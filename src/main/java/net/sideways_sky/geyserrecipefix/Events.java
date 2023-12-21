@@ -8,12 +8,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static net.sideways_sky.geyserrecipefix.utils.consoleSend;
@@ -33,7 +34,7 @@ public class Events implements Listener {
 
     @EventHandler
     public static void InventoryOpen(InventoryOpenEvent e){
-        if(!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())){
+        if((!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())) || e.getInventory().getHolder() instanceof WorkstationGUI){
             return;
         }
         switch (e.getInventory().getType()){
@@ -48,13 +49,8 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public static void InventoryClose(InventoryCloseEvent e){
-        if(!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())){
-            return;
-        }
-        if(e.getInventory().getHolder() instanceof WorkstationGUI inv){
-            inv.onClose(e);
-        }
+    public static void PrepareSmithing(PrepareSmithingEvent e){
+        consoleSend("PrepareSmithing: " + Arrays.toString(e.getHandlers().getRegisteredListeners()));
     }
 
     @EventHandler
@@ -62,6 +58,13 @@ public class Events implements Listener {
         if(e.getClickedInventory() == null){return;}
         if(e.getView().getTopInventory().getHolder() instanceof WorkstationGUI inv){
             inv.onViewClick(e);
+        }
+    }
+
+    @EventHandler
+    public static void InventoryClose(InventoryCloseEvent e){
+        if(e.getInventory().getHolder() instanceof WorkstationGUI inv){
+            inv.onClose(e);
         }
     }
 }
