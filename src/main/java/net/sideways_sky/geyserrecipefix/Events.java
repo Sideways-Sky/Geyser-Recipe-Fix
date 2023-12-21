@@ -8,7 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingRecipe;
@@ -33,7 +33,7 @@ public class Events implements Listener {
 
     @EventHandler
     public static void InventoryOpen(InventoryOpenEvent e){
-        if(!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())){
+        if((!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())) || e.getInventory().getHolder() instanceof WorkstationGUI){
             return;
         }
         switch (e.getInventory().getType()){
@@ -48,13 +48,11 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public static void InventoryClose(InventoryCloseEvent e){
-        if(!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())){
-            return;
-        }
-        if(e.getInventory().getHolder() instanceof WorkstationGUI inv){
-            inv.onClose(e);
-        }
+    public static void PrepareSmithing(PrepareSmithingEvent e){
+        consoleSend("PrepareSmithing: " + e.getHandlers().getRegisteredListeners().length);
+        e.getInventory();
+        e.getView();
+        e.getResult();
     }
 
     @EventHandler

@@ -1,10 +1,10 @@
 package net.sideways_sky.geyserrecipefix.inventories.Smithing;
 
 public enum SmithingSlot {
-    TEMPLATE(9),
-    BASE(10),
-    ADDITION(11),
-    RESULT(14);
+    TEMPLATE(0),
+    BASE(1),
+    ADDITION(2),
+    RESULT(3);
 
 
     public final int i;
