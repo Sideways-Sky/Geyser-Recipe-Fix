@@ -1,4 +1,4 @@
-package net.sideways_sky.geyserrecipefix.inventories.Smithing;
+package net.sideways_sky.geyserrecipefix.inventories.smithing;
 
 public enum SmithingSlot {
     TEMPLATE(9),

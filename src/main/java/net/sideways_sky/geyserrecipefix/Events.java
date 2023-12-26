@@ -1,20 +1,21 @@
 package net.sideways_sky.geyserrecipefix;
 
-import net.sideways_sky.geyserrecipefix.inventories.Smithing.Smithing;
+
 import net.sideways_sky.geyserrecipefix.inventories.WorkstationGUI;
+import net.sideways_sky.geyserrecipefix.inventories.anvil.Anvil;
+import net.sideways_sky.geyserrecipefix.inventories.smithing.Smithing;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.server.ServerLoadEvent;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.SmithingRecipe;
+import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import static net.sideways_sky.geyserrecipefix.utils.consoleSend;
@@ -29,7 +30,19 @@ public class Events implements Listener {
                 Smithing.recipes.add(r);
             }
         }
-        consoleSend("Loaded " + Smithing.recipes.size() + " Smithing Recipes");
+        consoleSend("Loaded " + Smithing.recipes.size() + " smithing Recipes");
+    }
+
+    @EventHandler
+    public static void test(PrepareAnvilEvent e){
+        if(e.getInventory().getFirstItem() == null){
+            return;
+        }
+        AnvilInventory inv = e.getInventory();
+        if(e.getInventory().getFirstItem().getType() == Material.STRUCTURE_VOID){
+            e.setResult(new ItemStack(Material.STRUCTURE_BLOCK));
+        }
+        consoleSend("PrepareAnvilEvent: " + inv.getRepairCost() + " / " + inv.getRepairCostAmount() + " | " + inv.getMaximumRepairCost() + " - " + inv.getRenameText());
     }
 
     @EventHandler
@@ -40,17 +53,14 @@ public class Events implements Listener {
         switch (e.getInventory().getType()){
             case SMITHING -> {
                 e.setCancelled(true);
-                Smithing.open(e.getPlayer());
+                new Smithing().open(e.getPlayer());
             }
             case ANVIL -> {
-
+                AnvilInventory inv = (AnvilInventory) e.getInventory();
+                e.setCancelled(true);
+                new Anvil(inv).open(e.getPlayer());
             }
         }
-    }
-
-    @EventHandler
-    public static void PrepareSmithing(PrepareSmithingEvent e){
-        consoleSend("PrepareSmithing: " + Arrays.toString(e.getHandlers().getRegisteredListeners()));
     }
 
     @EventHandler

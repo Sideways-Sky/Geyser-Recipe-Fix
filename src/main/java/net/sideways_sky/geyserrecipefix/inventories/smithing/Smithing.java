@@ -1,4 +1,4 @@
-package net.sideways_sky.geyserrecipefix.inventories.Smithing;
+package net.sideways_sky.geyserrecipefix.inventories.smithing;
 
 import net.kyori.adventure.text.Component;
 import net.sideways_sky.geyserrecipefix.inventories.SimulatedInventoryView;
@@ -88,9 +88,12 @@ public class Smithing extends WorkstationGUI {
                 e.setCancelled(true);
                 return;
             }
-            inventory.getItem(SmithingSlot.TEMPLATE.i).add(-1);
-            inventory.getItem(SmithingSlot.BASE.i).add(-1);
-            inventory.getItem(SmithingSlot.ADDITION.i).add(-1);
+            for(SmithingSlot slot : SmithingSlot.values()){
+                if(slot == SmithingSlot.RESULT){continue;}
+                ItemStack item = inventory.getItem(slot.i);
+                if(item == null){continue;}
+                item.add(-1);
+            }
             return;
         }
         Inventory newInv = cloneInv(inventory, true);

@@ -1,10 +1,12 @@
-package net.sideways_sky.geyserrecipefix.inventories.Smithing;
+package net.sideways_sky.geyserrecipefix.inventories;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,59 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
-public class SimulatedSmithingInventory implements SmithingInventory {
+public class SimulatedInventory implements Inventory {
     @NotNull
-    private final Inventory inventory;
-    @Nullable
-    private final Recipe recipe;
+    protected final Inventory inventory;
 
-    public SimulatedSmithingInventory(@NotNull Inventory inventory, @Nullable Recipe recipe){
+    public SimulatedInventory(@NotNull Inventory inventory) {
         this.inventory = inventory;
-        this.recipe = recipe;
-    }
-    @Override
-    public @Nullable ItemStack getResult() {
-        return inventory.getItem(SmithingSlot.RESULT.i);
-    }
-
-    @Override
-    public void setResult(@Nullable ItemStack newResult) {
-        inventory.setItem(SmithingSlot.RESULT.i, newResult);
-    }
-
-    @Override
-    public @Nullable Recipe getRecipe() {
-        return recipe;
-    }
-
-    @Override
-    public @Nullable ItemStack getInputTemplate() {
-        return inventory.getItem(SmithingSlot.TEMPLATE.i);
-    }
-
-    @Override
-    public void setInputTemplate(@Nullable ItemStack itemStack) {
-        inventory.setItem(SmithingSlot.TEMPLATE.i, itemStack);
-    }
-
-    @Override
-    public @Nullable ItemStack getInputEquipment() {
-        return inventory.getItem(SmithingSlot.BASE.i);
-    }
-
-    @Override
-    public void setInputEquipment(@Nullable ItemStack itemStack) {
-        inventory.setItem(SmithingSlot.BASE.i, itemStack);
-    }
-
-    @Override
-    public @Nullable ItemStack getInputMineral() {
-        return inventory.getItem(SmithingSlot.ADDITION.i);
-    }
-
-    @Override
-    public void setInputMineral(@Nullable ItemStack itemStack) {
-        inventory.setItem(SmithingSlot.ADDITION.i, itemStack);
     }
 
     @Override
@@ -242,3 +197,4 @@ public class SimulatedSmithingInventory implements SmithingInventory {
         return inventory.getLocation();
     }
 }
+
