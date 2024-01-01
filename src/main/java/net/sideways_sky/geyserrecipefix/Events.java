@@ -8,14 +8,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static net.sideways_sky.geyserrecipefix.utils.consoleSend;
@@ -35,14 +33,7 @@ public class Events implements Listener {
 
     @EventHandler
     public static void test(PrepareAnvilEvent e){
-        if(e.getInventory().getFirstItem() == null){
-            return;
-        }
-        AnvilInventory inv = e.getInventory();
-        if(e.getInventory().getFirstItem().getType() == Material.STRUCTURE_VOID){
-            e.setResult(new ItemStack(Material.STRUCTURE_BLOCK));
-        }
-        consoleSend("PrepareAnvilEvent: " + inv.getRepairCost() + " / " + inv.getRepairCostAmount() + " | " + inv.getMaximumRepairCost() + " - " + inv.getRenameText());
+        consoleSend("Prepare: " + Arrays.toString(e.getInventory().getContents()));
     }
 
     @EventHandler
@@ -50,15 +41,14 @@ public class Events implements Listener {
         if((!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())) || e.getInventory().getHolder() instanceof WorkstationGUI){
             return;
         }
-        switch (e.getInventory().getType()){
-            case SMITHING -> {
+        if(e.getInventory() instanceof SmithingInventory inv){
+            e.setCancelled(true);
+            new Smithing(inv).open(e.getPlayer());
+        } else if (e.getInventory() instanceof AnvilInventory inv) {
+            Anvil res = Anvil.get(inv);
+            if(res == null){
                 e.setCancelled(true);
-                new Smithing().open(e.getPlayer());
-            }
-            case ANVIL -> {
-                AnvilInventory inv = (AnvilInventory) e.getInventory();
-                e.setCancelled(true);
-                new Anvil(inv).open(e.getPlayer());
+                Anvil.create(inv).open(e.getPlayer());
             }
         }
     }

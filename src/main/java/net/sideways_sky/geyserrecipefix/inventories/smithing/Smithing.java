@@ -1,12 +1,11 @@
 package net.sideways_sky.geyserrecipefix.inventories.smithing;
 
 import net.kyori.adventure.text.Component;
-import net.sideways_sky.geyserrecipefix.inventories.SimulatedInventoryView;
+import net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix;
 import net.sideways_sky.geyserrecipefix.inventories.WorkstationGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.*;
 
 import java.util.*;
@@ -15,39 +14,16 @@ import static net.sideways_sky.geyserrecipefix.utils.*;
 
 public class Smithing extends WorkstationGUI {
     public static List<SmithingRecipe> recipes = new ArrayList<>();
-    public Smithing () {
+    private final SmithingInventory backInv;
+    public Smithing (SmithingInventory backInv) {
+        this.backInv = backInv;
         inventory = Bukkit.createInventory(this, 27, Component.text("Smithing"));
-        for (int i = 0; i < 9; i++) {
-            inventory.setItem(i, Filler);
-        }
-        // 9 - template
-        // 10 - base
-        // 11 - addition
-        inventory.setItem(12, Filler);
-        inventory.setItem(13, Filler);
-        // 14 - result
-        for (int i = 15; i < 27; i++) {
-            inventory.setItem(i, Filler);
-        }
-    }
-    private static SmithingRecipe checkForRecipe(Inventory inv){
-        ItemStack template = Objects.requireNonNullElseGet(inv.getItem(SmithingSlot.TEMPLATE.i), ItemStack::empty);
-        ItemStack base = Objects.requireNonNullElseGet(inv.getItem(SmithingSlot.BASE.i), ItemStack::empty);
-        ItemStack addition = Objects.requireNonNullElseGet(inv.getItem(SmithingSlot.ADDITION.i), ItemStack::empty);
-        for(SmithingRecipe r : recipes){
-            if(r instanceof SmithingTransformRecipe recipe){
-                if(recipe.getTemplate().test(template) && recipe.getBase().test(base) && recipe.getAddition().test(addition)){
-                    return recipe;
-                }
-            } else if (r instanceof SmithingTrimRecipe recipe) {
-                if(recipe.getTemplate().test(template) && recipe.getBase().test(base) && recipe.getAddition().test(addition)){
-                    return recipe;
-                }
-            } else {
-                consoleSend("Unknown recipe type: " + r.toString());
+        for (int i = 0; i < inventory.getSize(); i++) {
+            if(SmithingSlot.getSlot(i) != null){
+                continue;
             }
+            inventory.setItem(i, Filler);
         }
-        return null;
     }
     private static Set<SmithingSlot> findSlotsForItem(ItemStack item) {
         Set<SmithingSlot> found = new HashSet<>();
@@ -78,12 +54,30 @@ public class Smithing extends WorkstationGUI {
         }
         return found;
     }
+    private SmithingSlot findSlotForItem(ItemStack item){
+        Set<SmithingSlot> goesIn = findSlotsForItem(item);
+        if(goesIn.isEmpty()){
+            return null;
+        }
+        for(SmithingSlot slot : goesIn){
+            ItemStack Item = inventory.getItem(slot.i);
+            if(Item == null || Item.isEmpty()){
+                return slot;
+            }
+        }
+        return null;
+    }
     @Override
     public void onViewClick(InventoryClickEvent e) {
         if(e.getClickedInventory().getHolder() != this){
             return;
         }
-        if(e.getSlot() == SmithingSlot.RESULT.i){
+        SmithingSlot clickedSlot = SmithingSlot.getSlot(e.getSlot());
+        if(clickedSlot == null){
+            e.setCancelled(true);
+            return;
+        }
+        if(clickedSlot == SmithingSlot.RESULT){
             if(e.getCurrentItem() == null){
                 e.setCancelled(true);
                 return;
@@ -94,48 +88,35 @@ public class Smithing extends WorkstationGUI {
                 if(item == null){continue;}
                 item.add(-1);
             }
-            return;
         }
-        Inventory newInv = cloneInv(inventory, true);
-        newInv.setItem(e.getSlot(), e.getCursor());
 
-        if(!e.getCursor().isEmpty()){
-            Set<SmithingSlot> goesIn = findSlotsForItem(e.getCursor());
-            if(goesIn.isEmpty()){
-                e.setCancelled(true);
-                return;
-            }
-            if(!goesIn.contains(SmithingSlot.getSlot(e.getSlot()))){
-                for(SmithingSlot slot : goesIn){
-                    ItemStack Item = inventory.getItem(slot.i);
-                    if(Item == null || Item.isEmpty()){
-                        inventory.setItem(slot.i, e.getCursor());
-                        e.setCursor(null);
-                        break;
-                    }
+        Bukkit.getScheduler().runTaskLater(Geyser_Recipe_Fix.instance, () -> {
+            ItemStack item = inventory.getItem(clickedSlot.i);
+            if(item != null){
+                SmithingSlot goesTo = findSlotForItem(item);
+                if(goesTo != null && goesTo != clickedSlot){
+                    inventory.setItem(clickedSlot.i, ItemStack.empty());
+                    inventory.setItem(goesTo.i, item);
                 }
             }
-        }
 
-        SmithingRecipe recipe = checkForRecipe(newInv);
+            updateWithBack();
+        }, 1);
+    }
+    private void updateWithBack(){
+        backInv.setInputTemplate(inventory.getItem(SmithingSlot.TEMPLATE.i));
+        backInv.setInputEquipment(inventory.getItem(SmithingSlot.BASE.i));
+        backInv.setInputMineral(inventory.getItem(SmithingSlot.ADDITION.i));
+        backInv.setResult(inventory.getItem(SmithingSlot.RESULT.i));
 
-        SimulatedSmithingInventory simInv = new SimulatedSmithingInventory(newInv, recipe);
-        SimulatedInventoryView view = new SimulatedInventoryView(simInv, e.getWhoClicked(), e.getView().getOriginalTitle());
-
-        ItemStack base = inventory.getItem(SmithingSlot.BASE.i);
-        ItemStack result = recipe == null ? null : recipe.getResult();
-
-        if(result != null && base != null && recipe.willCopyNbt()){
-            result = mergeMeta(result, base);
-        }
-
-        PrepareSmithingEvent event = new PrepareSmithingEvent(view, result);
-        Bukkit.getPluginManager().callEvent(event);
-
-        inventory.setItem(SmithingSlot.RESULT.i, event.getResult());
+        inventory.setItem(SmithingSlot.TEMPLATE.i, backInv.getInputTemplate());
+        inventory.setItem(SmithingSlot.BASE.i, backInv.getInputEquipment());
+        inventory.setItem(SmithingSlot.ADDITION.i, backInv.getInputMineral());
+        inventory.setItem(SmithingSlot.RESULT.i, backInv.getResult());
     }
     @Override
     public void onClose(InventoryCloseEvent e){
+        backInv.close();
         for(SmithingSlot slot : SmithingSlot.values()){
             ItemStack item = inventory.getItem(slot.i);
             if(item == null){ continue; }
