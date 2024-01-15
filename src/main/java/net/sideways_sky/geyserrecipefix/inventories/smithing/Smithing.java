@@ -104,10 +104,10 @@ public class Smithing extends WorkstationGUI {
         }, 1);
     }
     private void updateWithBack(){
+        backInv.setResult(inventory.getItem(SmithingSlot.RESULT.i));
         backInv.setInputTemplate(inventory.getItem(SmithingSlot.TEMPLATE.i));
         backInv.setInputEquipment(inventory.getItem(SmithingSlot.BASE.i));
         backInv.setInputMineral(inventory.getItem(SmithingSlot.ADDITION.i));
-        backInv.setResult(inventory.getItem(SmithingSlot.RESULT.i));
 
         inventory.setItem(SmithingSlot.TEMPLATE.i, backInv.getInputTemplate());
         inventory.setItem(SmithingSlot.BASE.i, backInv.getInputEquipment());

@@ -10,8 +10,6 @@ import org.geysermc.geyser.api.item.custom.CustomItemOptions;
 
 import java.io.File;
 
-import static net.sideways_sky.geyserrecipefix.utils.consoleSend;
-
 public class GeyserEvents implements EventRegistrar {
     public GeyserEvents(){
         EventBus<EventRegistrar> bus = Geyser_Recipe_Fix.GeyserInstance.eventBus();
@@ -33,7 +31,5 @@ public class GeyserEvents implements EventRegistrar {
             Geyser_Recipe_Fix.instance.saveResource("pack.mcpack", true);
         }
         e.resourcePacks().add(rp.toPath());
-
-        consoleSend("Packs: " + e.resourcePacks());
     }
 }

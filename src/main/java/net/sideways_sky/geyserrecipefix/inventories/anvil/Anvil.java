@@ -1,10 +1,12 @@
 package net.sideways_sky.geyserrecipefix.inventories.anvil;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix;
 import net.sideways_sky.geyserrecipefix.inventories.WorkstationGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftInventoryAnvil;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -13,6 +15,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +32,6 @@ public class Anvil extends WorkstationGUI {
         for (WeakReference<Anvil> instance : instances) {
             Anvil item = instance.get();
             if (item != null && item.isMyBack(backInv)) {
-                consoleSend("Got it - get");
                 return item;
             }
         }
@@ -39,6 +41,19 @@ public class Anvil extends WorkstationGUI {
     private boolean isOpeningBack = false;
     private Anvil(AnvilInventory backInv){
         this.backInv = backInv;
+
+        if(backInv.getRenameText() == null){
+            CraftInventoryAnvil craftAnvil = (CraftInventoryAnvil) backInv;
+            try {
+                Field field = craftAnvil.getClass().getDeclaredField("container");
+                field.setAccessible(true);
+                AnvilMenu anvilMenu = (AnvilMenu) field.get(craftAnvil);
+                anvilMenu.setItemName("");
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                Bukkit.getLogger().warning("AnvilMenu injection Failed! RenameText is null. This may break some plugins that have custom anvil recipes\n"+e.getLocalizedMessage());
+            }
+        }
+
         inventory = Bukkit.createInventory(this, 27, Component.text("Anvil"));
         for (int i = 0; i < inventory.getSize(); i++) {
             if(AnvilSlot.getSlot(i) != null){
@@ -60,7 +75,6 @@ public class Anvil extends WorkstationGUI {
             return;
         }
         if(view.getTopInventory() instanceof AnvilInventory inv){
-            consoleSend("Update back!");
             inv.setFirstItem(inventory.getItem(AnvilSlot.FIRST.i));
             inv.setSecondItem(inventory.getItem(AnvilSlot.SECOND.i));
             backInv = inv;
@@ -90,17 +104,15 @@ public class Anvil extends WorkstationGUI {
 
         Bukkit.getScheduler().runTaskLater(Geyser_Recipe_Fix.instance, this::updateWithBack, 1);
     }
-
     private void updateWithBack(){
+        backInv.setResult(inventory.getItem(AnvilSlot.RESULT.i));
         backInv.setFirstItem(inventory.getItem(AnvilSlot.FIRST.i));
         backInv.setSecondItem(inventory.getItem(AnvilSlot.SECOND.i));
-        backInv.setResult(inventory.getItem(AnvilSlot.RESULT.i));
 
         inventory.setItem(AnvilSlot.RESULT.i, backInv.getResult());
         inventory.setItem(AnvilSlot.FIRST.i, backInv.getFirstItem());
         inventory.setItem(AnvilSlot.SECOND.i, backInv.getSecondItem());
     }
-
     @Override
     public void onClose(InventoryCloseEvent e) {
         if(isOpeningBack){return;}
