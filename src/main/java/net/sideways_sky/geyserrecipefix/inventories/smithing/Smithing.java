@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -54,6 +55,7 @@ public class Smithing extends WorkstationGUI {
         }
         return found;
     }
+    @Nullable
     private SmithingSlot findSlotForItem(ItemStack item){
         Set<SmithingSlot> goesIn = findSlotsForItem(item);
         if(goesIn.isEmpty()){

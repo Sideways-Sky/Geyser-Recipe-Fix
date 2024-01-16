@@ -1,11 +1,14 @@
 package net.sideways_sky.geyserrecipefix.inventories.anvil;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.Slot;
 import net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix;
 import net.sideways_sky.geyserrecipefix.inventories.WorkstationGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftInventoryAnvil;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -37,7 +40,8 @@ public class Anvil extends WorkstationGUI {
         }
         return null;
     }
-    private AnvilInventory backInv;
+    private final AnvilInventory backInv;
+    private AnvilMenu backInvContainer;
     private boolean isOpeningBack = false;
     private Anvil(AnvilInventory backInv){
         this.backInv = backInv;
@@ -47,12 +51,14 @@ public class Anvil extends WorkstationGUI {
             try {
                 Field field = craftAnvil.getClass().getDeclaredField("container");
                 field.setAccessible(true);
-                AnvilMenu anvilMenu = (AnvilMenu) field.get(craftAnvil);
-                anvilMenu.setItemName("");
+                backInvContainer = (AnvilMenu) field.get(craftAnvil);
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                Bukkit.getLogger().warning("AnvilMenu injection Failed! RenameText is null. This may break some plugins that have custom anvil recipes\n"+e.getLocalizedMessage());
+                Bukkit.getLogger().warning("AnvilMenu injection Failed!");
+                throw new RuntimeException(e);
             }
         }
+
+        backInvContainer.setItemName("");
 
         inventory = Bukkit.createInventory(this, 27, Component.text("Anvil"));
         for (int i = 0; i < inventory.getSize(); i++) {
@@ -77,7 +83,6 @@ public class Anvil extends WorkstationGUI {
         if(view.getTopInventory() instanceof AnvilInventory inv){
             inv.setFirstItem(inventory.getItem(AnvilSlot.FIRST.i));
             inv.setSecondItem(inventory.getItem(AnvilSlot.SECOND.i));
-            backInv = inv;
         } else {
             consoleSend("Unknown Anvil inventory type: " + view.getTopInventory());
         }
@@ -91,15 +96,28 @@ public class Anvil extends WorkstationGUI {
         if(clickedSlot == null){
             e.setCancelled(true);
             return;
-        }
+        } else
         if(clickedSlot == AnvilSlot.FORWARD){
             e.setCancelled(true);
             openBack(e.getWhoClicked());
             return;
-        }
-        if(clickedSlot == AnvilSlot.RESULT && e.getCurrentItem() == null){
-            e.setCancelled(true);
-            return;
+        } else
+        if(clickedSlot == AnvilSlot.RESULT){
+            if(e.getCurrentItem() == null){
+                e.setCancelled(true);
+                return;
+            }
+            ServerPlayer player = ((CraftPlayer) e.getWhoClicked()).getHandle();
+            Slot resultSlot = backInvContainer.getSlot(backInvContainer.getResultSlot());
+            if(!resultSlot.mayPickup(player)){
+                e.setCancelled(true);
+                return;
+            }
+            net.minecraft.world.item.ItemStack item = net.minecraft.world.item.ItemStack.fromBukkitCopy(inventory.getItem(AnvilSlot.RESULT.i));
+            resultSlot.onTake(player, item);
+            // Result is taken by player
+            inventory.setItem(AnvilSlot.FIRST.i, backInv.getFirstItem());
+            inventory.setItem(AnvilSlot.SECOND.i, backInv.getSecondItem());
         }
 
         Bukkit.getScheduler().runTaskLater(Geyser_Recipe_Fix.instance, this::updateWithBack, 1);
@@ -117,7 +135,7 @@ public class Anvil extends WorkstationGUI {
     public void onClose(InventoryCloseEvent e) {
         if(isOpeningBack){return;}
         for(AnvilSlot slot : AnvilSlot.values()){
-            if(slot == AnvilSlot.FORWARD){continue;}
+            if(!slot.open){continue;}
             ItemStack item = inventory.getItem(slot.i);
             if(item == null){ continue; }
             e.getPlayer().getInventory().addItem(item);
