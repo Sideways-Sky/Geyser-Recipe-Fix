@@ -8,9 +8,8 @@ import net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix;
 import net.sideways_sky.geyserrecipefix.inventories.WorkstationGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftInventoryAnvil;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.AnvilInventory;
@@ -18,7 +17,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,12 +46,10 @@ public class Anvil extends WorkstationGUI {
         this.backInv = backInv;
 
         if(backInv.getRenameText() == null){
-            CraftInventoryAnvil craftAnvil = (CraftInventoryAnvil) backInv;
+
             try {
-                Field field = craftAnvil.getClass().getDeclaredField("container");
-                field.setAccessible(true);
-                backInvContainer = (AnvilMenu) field.get(craftAnvil);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+                backInvContainer = Geyser_Recipe_Fix.nms.getAnvilContainer(backInv);
+            } catch (IllegalAccessException e) {
                 Bukkit.getLogger().warning("AnvilMenu injection Failed!");
                 throw new RuntimeException(e);
             }
@@ -107,17 +104,22 @@ public class Anvil extends WorkstationGUI {
                 e.setCancelled(true);
                 return;
             }
-            ServerPlayer player = ((CraftPlayer) e.getWhoClicked()).getHandle();
-            Slot resultSlot = backInvContainer.getSlot(backInvContainer.getResultSlot());
-            if(!resultSlot.mayPickup(player)){
-                e.setCancelled(true);
-                return;
+            try {
+                ServerPlayer player = Geyser_Recipe_Fix.nms.getServerPlayer((Player) e.getWhoClicked());
+                Slot resultSlot = backInvContainer.getSlot(backInvContainer.getResultSlot());
+                if(!resultSlot.mayPickup(player)){
+                    e.setCancelled(true);
+                    return;
+                }
+                net.minecraft.world.item.ItemStack item = net.minecraft.world.item.ItemStack.fromBukkitCopy(inventory.getItem(AnvilSlot.RESULT.i));
+                resultSlot.onTake(player, item);
+                // Result is taken by player
+                inventory.setItem(AnvilSlot.FIRST.i, backInv.getFirstItem());
+                inventory.setItem(AnvilSlot.SECOND.i, backInv.getSecondItem());
+
+            } catch (InvocationTargetException | IllegalAccessException ex) {
+                throw new RuntimeException(ex);
             }
-            net.minecraft.world.item.ItemStack item = net.minecraft.world.item.ItemStack.fromBukkitCopy(inventory.getItem(AnvilSlot.RESULT.i));
-            resultSlot.onTake(player, item);
-            // Result is taken by player
-            inventory.setItem(AnvilSlot.FIRST.i, backInv.getFirstItem());
-            inventory.setItem(AnvilSlot.SECOND.i, backInv.getSecondItem());
         }
 
         Bukkit.getScheduler().runTaskLater(Geyser_Recipe_Fix.instance, this::updateWithBack, 1);
