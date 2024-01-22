@@ -31,7 +31,7 @@ public class Events implements Listener {
 
     @EventHandler
     public static void onInventoryOpen(InventoryOpenEvent e){
-        if((!Geyser_Recipe_Fix.GeyserInstance.isBedrockPlayer(e.getPlayer().getUniqueId())) || e.getInventory().getHolder() instanceof WorkstationGUI){
+        if((!Geyser_Recipe_Fix.geyserApi.isBedrockPlayer(e.getPlayer().getUniqueId())) || e.getInventory().getHolder() instanceof WorkstationGUI){
             return;
         }
         if(e.getInventory() instanceof SmithingInventory inv){

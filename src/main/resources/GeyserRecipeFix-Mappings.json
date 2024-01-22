@@ -1,0 +1,12 @@
+{
+  "format_version": 1,
+  "items": {
+    "minecraft:structure_void": [
+      {
+        "name": "empty",
+        "custom_model_data": 593721,
+        "display_name": " "
+      }
+    ]
+  }
+}
