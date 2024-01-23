@@ -11,8 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.sideways_sky.geyserrecipefix.utils.*;
-
 public class Smithing extends WorkstationGUI {
     public static List<SmithingRecipe> recipes = new ArrayList<>();
     private final SmithingInventory backInv;
@@ -50,7 +48,7 @@ public class Smithing extends WorkstationGUI {
                     found.add(SmithingSlot.ADDITION);
                 }
             } else {
-                consoleSend("Unknown recipe type: " + r.toString());
+                Bukkit.getLogger().severe("Unknown recipe type: " + r.toString());
             }
         }
         return found;
@@ -118,7 +116,6 @@ public class Smithing extends WorkstationGUI {
     }
     @Override
     public void onClose(InventoryCloseEvent e){
-        backInv.close();
         for(SmithingSlot slot : SmithingSlot.values()){
             ItemStack item = inventory.getItem(slot.i);
             if(item == null){ continue; }

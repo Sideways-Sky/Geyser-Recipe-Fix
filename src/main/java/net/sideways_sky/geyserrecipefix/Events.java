@@ -14,8 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
-import static net.sideways_sky.geyserrecipefix.utils.consoleSend;
-
 public class Events implements Listener {
 
     @EventHandler
@@ -26,7 +24,7 @@ public class Events implements Listener {
                 Smithing.recipes.add(r);
             }
         }
-        consoleSend("Loaded " + Smithing.recipes.size() + " smithing Recipes");
+        Bukkit.getLogger().info("Loaded " + Smithing.recipes.size() + " smithing Recipes");
     }
 
     @EventHandler

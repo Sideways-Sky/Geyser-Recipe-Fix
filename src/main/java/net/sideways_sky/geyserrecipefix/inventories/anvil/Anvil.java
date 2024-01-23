@@ -21,8 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.sideways_sky.geyserrecipefix.utils.consoleSend;
-
 public class Anvil extends WorkstationGUI {
     public static List<WeakReference<Anvil>> instances = new ArrayList<>();
     public static Anvil create(AnvilInventory backInv) {
@@ -46,7 +44,6 @@ public class Anvil extends WorkstationGUI {
         this.backInv = backInv;
 
         if(backInv.getRenameText() == null){
-
             try {
                 backInvContainer = Geyser_Recipe_Fix.nms.getAnvilContainer(backInv);
             } catch (IllegalAccessException e) {
@@ -71,17 +68,17 @@ public class Anvil extends WorkstationGUI {
     }
     private void openBack(HumanEntity player){
         isOpeningBack = true;
-        InventoryView view = player.openAnvil(backInv.getLocation(), false);
+        InventoryView view = player.openAnvil(backInv.getLocation(), true);
         isOpeningBack = false;
         if(view == null){
-            open(player);
+            Bukkit.getLogger().severe("Unable to open default Anvil inventory");
             return;
         }
         if(view.getTopInventory() instanceof AnvilInventory inv){
             inv.setFirstItem(inventory.getItem(AnvilSlot.FIRST.i));
             inv.setSecondItem(inventory.getItem(AnvilSlot.SECOND.i));
         } else {
-            consoleSend("Unknown Anvil inventory type: " + view.getTopInventory());
+            Bukkit.getLogger().severe("Unknown Anvil inventory type: " + view.getTopInventory());
         }
     }
     @Override
@@ -125,7 +122,10 @@ public class Anvil extends WorkstationGUI {
         Bukkit.getScheduler().runTaskLater(Geyser_Recipe_Fix.instance, this::updateWithBack, 1);
     }
     private void updateWithBack(){
-        backInv.setResult(inventory.getItem(AnvilSlot.RESULT.i));
+        net.minecraft.world.item.ItemStack item = net.minecraft.world.item.ItemStack.fromBukkitCopy(inventory.getItem(AnvilSlot.FIRST.i));
+        if(item.hasCustomHoverName()){
+            backInvContainer.setItemName(item.getHoverName().getString());
+        }
         backInv.setFirstItem(inventory.getItem(AnvilSlot.FIRST.i));
         backInv.setSecondItem(inventory.getItem(AnvilSlot.SECOND.i));
 
@@ -139,7 +139,7 @@ public class Anvil extends WorkstationGUI {
         for(AnvilSlot slot : AnvilSlot.values()){
             if(!slot.open){continue;}
             ItemStack item = inventory.getItem(slot.i);
-            if(item == null){ continue; }
+            if(item == null){ continue;}
             e.getPlayer().getInventory().addItem(item);
         }
     }
