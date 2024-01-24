@@ -4,6 +4,7 @@ public enum AnvilSlot {
     FIRST(10, true),
     SECOND(13, true),
     RESULT(16, true),
+    COST(25, false),
     FORWARD(26, false);
     public final int i;
     public final boolean open;

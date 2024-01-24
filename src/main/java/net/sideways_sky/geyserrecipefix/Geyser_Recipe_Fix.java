@@ -23,7 +23,6 @@ public final class Geyser_Recipe_Fix extends JavaPlugin {
         } catch (ClassNotFoundException | NoSuchFieldException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        WorkstationGUI.init();
         getServer().getPluginManager().registerEvents(new Events(), this);
         try {
             geyserApi = new GeyserHook();
@@ -36,7 +35,7 @@ public final class Geyser_Recipe_Fix extends JavaPlugin {
             }
         }
         if(geyserApi instanceof FloodgateHook){
-            getLogger().warning("Geyser not found but floodgate was. Take Mappings and Pack from this plugin's folder and add them to Geyser's");
+            getLogger().warning("Geyser was not found but floodgate was. Take Mappings and Pack from this plugin's folder and add them to Geyser's");
         }
     }
 

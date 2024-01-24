@@ -16,12 +16,12 @@ public class Smithing extends WorkstationGUI {
     private final SmithingInventory backInv;
     public Smithing (SmithingInventory backInv) {
         this.backInv = backInv;
-        inventory = Bukkit.createInventory(this, 27, Component.text("Smithing"));
+        inventory = Bukkit.createInventory(this, 27, Component.translatable("block.minecraft.smithing_table"));
         for (int i = 0; i < inventory.getSize(); i++) {
             if(SmithingSlot.getSlot(i) != null){
                 continue;
             }
-            inventory.setItem(i, Filler);
+            inventory.setItem(i, filler);
         }
     }
     private static Set<SmithingSlot> findSlotsForItem(ItemStack item) {
