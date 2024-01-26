@@ -104,7 +104,6 @@ public class Smithing extends WorkstationGUI {
         }, 1);
     }
     private void updateWithBack(){
-        backInv.setResult(inventory.getItem(SmithingSlot.RESULT.i));
         backInv.setInputTemplate(inventory.getItem(SmithingSlot.TEMPLATE.i));
         backInv.setInputEquipment(inventory.getItem(SmithingSlot.BASE.i));
         backInv.setInputMineral(inventory.getItem(SmithingSlot.ADDITION.i));
@@ -116,7 +115,7 @@ public class Smithing extends WorkstationGUI {
     }
     @Override
     public void onClose(InventoryCloseEvent e){
-        for(SmithingSlot slot : SmithingSlot.values()){
+        for(SmithingSlot slot : List.of(SmithingSlot.BASE, SmithingSlot.TEMPLATE, SmithingSlot.ADDITION)){
             ItemStack item = inventory.getItem(slot.i);
             if(item == null){ continue; }
             e.getPlayer().getInventory().addItem(item);
