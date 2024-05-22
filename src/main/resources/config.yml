@@ -1,0 +1,12 @@
+
+anvil:
+  # When should the anvil get override with custom menu
+  # ENABLED - always override
+  # DISABLED - never override
+  # SNEAKING - only override if the player is sneaking/crouching
+  # NOTSNEAKING - only override if the player is not sneaking/crouching
+  mode: "ENABLED"
+
+smithing:
+  # When should the smithing table get override with custom menu (Same mode system as anvil)
+  mode: "ENABLED"

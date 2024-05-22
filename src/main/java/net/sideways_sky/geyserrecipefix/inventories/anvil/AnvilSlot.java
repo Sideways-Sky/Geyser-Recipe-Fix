@@ -1,16 +1,16 @@
 package net.sideways_sky.geyserrecipefix.inventories.anvil;
 
 public enum AnvilSlot {
-    FIRST(10, true),
-    SECOND(13, true),
-    RESULT(16, true),
-    COST(25, false),
-    FORWARD(26, false);
+    FIRST(10, 0),
+    SECOND(13, 1),
+    RESULT(16, 2),
+    COST(25, -1),
+    FORWARD(26, -1);
     public final int i;
-    public final boolean open;
-    AnvilSlot(int i, boolean open) {
+    public final int OG_i;
+    AnvilSlot(int i, int og) {
         this.i = i;
-        this.open = open;
+        OG_i = og;
     }
     public static AnvilSlot getSlot(int i){
         for (AnvilSlot slot : values()){
