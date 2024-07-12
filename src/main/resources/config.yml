@@ -7,6 +7,12 @@ anvil:
   # NOTSNEAKING - only override if the player is not sneaking/crouching
   mode: "ENABLED"
 
+  # Should there be a menu item to allow opening the default vanilla menu
+  forward: true
+
 smithing:
   # When should the smithing table get override with custom menu (Same mode system as anvil)
   mode: "ENABLED"
+
+# Used for debugging. This will spam the console
+debug: false
