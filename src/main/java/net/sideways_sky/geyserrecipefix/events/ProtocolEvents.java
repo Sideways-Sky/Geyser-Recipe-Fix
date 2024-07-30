@@ -26,6 +26,19 @@ public class ProtocolEvents {
                 }
             }
         });
+        manager.addPacketListener(new PacketAdapter(instance, PacketType.Play.Server.CLOSE_WINDOW, PacketType.Play.Client.CLOSE_WINDOW) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                openMenus.remove(event.getPacket().getIntegers().read(0));
+                debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
+            }
+
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                openMenus.remove(event.getPacket().getIntegers().read(0));
+                debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
+            }
+        });
         manager.addPacketListener(new PacketAdapter(instance,
                 PacketType.Play.Server.WINDOW_ITEMS,
                 PacketType.Play.Server.WINDOW_DATA,
@@ -78,6 +91,11 @@ public class ProtocolEvents {
                     }
                     int backClick = sim.getBackIdxFromFrontIdx(frontClick);
                     debugInfo("front:" + frontClick + " -> back: " + backClick);
+                    if(backClick == -2){
+                        if(AnvilSim.forwardEnabled && sim instanceof AnvilSim){
+                            PaperEvents.openForward(event.getPlayer());
+                        }
+                    }
                     if(backClick == -1){
                         event.setCancelled(true);
                         sim.menu.sendAllDataToRemote();

@@ -7,13 +7,10 @@ import net.sideways_sky.geyserrecipefix.inventories.AnvilSim;
 import net.sideways_sky.geyserrecipefix.inventories.SimInventory;
 import net.sideways_sky.geyserrecipefix.inventories.SmithingSim;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.AnvilInventory;
@@ -64,10 +61,5 @@ public class PaperEvents implements Listener {
             sim.menu = menu;
             openMenus.put(menu.containerId, sim);
         }
-    }
-    @EventHandler
-    public static void onCloseInv(InventoryCloseEvent e){
-        AbstractContainerMenu menu = ((CraftInventoryView) e.getView()).getHandle();
-        openMenus.remove(menu.containerId);
     }
 }

@@ -5,7 +5,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AnvilMenu;
-import net.sideways_sky.geyserrecipefix.events.PaperEvents;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -85,10 +84,7 @@ public class AnvilSim extends SimInventory {
         AnvilSlot slot = AnvilSlot.getFromFrontIdx(frontIdx);
         if(slot == AnvilSlot.COST){return -1;}
         if(slot == AnvilSlot.FORWARD){
-            if(forwardEnabled){
-                PaperEvents.openForward(menu.getBukkitView().getPlayer());
-            }
-            return -1;
+            return -2;
         }
         return slot == null ? -1 : slot.backIdx;
     }

@@ -27,7 +27,7 @@ public final class Geyser_Recipe_Fix extends JavaPlugin implements Listener {
     public static Map<Integer, SimInventory> openMenus = new HashMap<>();
     public static Hook geyserApi;
 
-    private static Logger logger;
+    public static Logger logger;
     private static boolean debug = false;
 
     public static void debugInfo(String message){
