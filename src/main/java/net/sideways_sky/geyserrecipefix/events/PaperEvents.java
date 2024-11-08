@@ -19,8 +19,7 @@ import org.bukkit.inventory.SmithingInventory;
 import java.util.HashSet;
 import java.util.Set;
 
-import static net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix.instance;
-import static net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix.openMenus;
+import static net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix.*;
 
 public class PaperEvents implements Listener {
 
@@ -56,6 +55,7 @@ public class PaperEvents implements Listener {
             AbstractContainerMenu menu = ((CraftInventoryView) e.getView()).getHandle();
             SimInventory sim = openMenus.get(menu.containerId);
             if(sim == null){
+                debugInfo("New Sim; Wid:"+menu.containerId);
                 sim = e.getInventory().getType() == InventoryType.ANVIL ? new AnvilSim() : new SmithingSim();
             }
             sim.menu = menu;

@@ -1,6 +1,7 @@
 package net.sideways_sky.geyserrecipefix.inventories;
 
-import org.bukkit.inventory.ItemStack;
+
+import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import net.sideways_sky.geyserrecipefix.config.WorkstationMode;
 
 import java.util.ArrayList;

@@ -2,6 +2,8 @@ name: Geyser-Recipe-Fix
 version: '${version}'
 main: net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix
 api-version: '1.20'
+depend:
+  - packetevents
 softdepend:
-  - "floodgate"
-  - "Geyser-Spigot"
+  - floodgate
+  - Geyser-Spigot

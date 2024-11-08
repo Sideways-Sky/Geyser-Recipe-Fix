@@ -1,5 +1,7 @@
 package net.sideways_sky.geyserrecipefix.inventories;
 
+import com.github.retrooper.packetevents.protocol.item.ItemStack;
+import com.github.retrooper.packetevents.protocol.item.type.ItemTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -8,7 +10,7 @@ import net.minecraft.world.inventory.AnvilMenu;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+
 import org.bukkit.inventory.meta.ItemMeta;
 import net.sideways_sky.geyserrecipefix.config.WorkstationMode;
 
@@ -68,7 +70,7 @@ public class AnvilSim extends SimInventory {
                 continue;
             }
             if(slot == AnvilSlot.FORWARD){
-                res.add(forwardEnabled ? new ItemStack(Material.ANVIL) : filler);
+                res.add(forwardEnabled ? new ItemStack.Builder().type(ItemTypes.ANVIL).build() : filler);
                 continue;
             }
             res.add( slot == null ? filler : items.get(slot.backIdx));
@@ -104,11 +106,12 @@ public class AnvilSim extends SimInventory {
         boolean canTake = advMenu.getSlot(advMenu.getResultSlot()).mayPickup(serverPlayer);
         serverPlayer.containerSynchronizer.sendSlotChange(menu, AnvilSlot.COST.backIdx, net.minecraft.world.item.ItemStack.fromBukkitCopy(getCostIndicator(cost, canTake)));
     }
-    private ItemStack getCostIndicator(int cost, boolean canTake){
+    private org.bukkit.inventory.ItemStack getCostIndicator(int cost, boolean canTake){
         if(cost <= 0){
-            return filler;
+            return bukkitFiller;
         }
-        ItemStack indicator = new ItemStack(canTake ? Material.LIME_STAINED_GLASS : Material.RED_STAINED_GLASS);
+
+        org.bukkit.inventory.ItemStack indicator = new org.bukkit.inventory.ItemStack(canTake ? Material.LIME_STAINED_GLASS : Material.RED_STAINED_GLASS);
         ItemMeta indicatorMeta = indicator.getItemMeta();
         indicatorMeta.displayName(Component.translatable("container.repair.cost", "Enchantment Cost: %1$s", Component.text(cost)).style(Style.style(canTake ? NamedTextColor.GREEN : NamedTextColor.RED)));
         indicator.setItemMeta(indicatorMeta);

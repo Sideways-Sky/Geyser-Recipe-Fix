@@ -1,111 +1,120 @@
 package net.sideways_sky.geyserrecipefix.events;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.ItemStack;
+import com.github.retrooper.packetevents.event.*;
+import com.github.retrooper.packetevents.protocol.item.ItemStack;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClickWindow;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCloseWindow;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import net.sideways_sky.geyserrecipefix.inventories.AnvilSim;
 import net.sideways_sky.geyserrecipefix.inventories.SimInventory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static net.sideways_sky.geyserrecipefix.Geyser_Recipe_Fix.*;
 
 
-public class ProtocolEvents {
+public class ProtocolEvents implements PacketListener {
 
-    public static void addListeners() {
-        manager.addPacketListener(new PacketAdapter(instance, PacketType.Play.Server.OPEN_WINDOW) {
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                SimInventory sim = openMenus.get(event.getPacket().getIntegers().read(0));
-                if(sim != null){
-                    debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
-                    event.getPacket().getModifier().write(1, MenuType.GENERIC_9x3);
+    @Override
+    public void onPacketReceive(PacketReceiveEvent event){
+        switch (event.getPacketType()){
+            case PacketType.Play.Client.CLOSE_WINDOW -> {
+                WrapperPlayClientCloseWindow packet = new WrapperPlayClientCloseWindow(event);
+                debugInfo("Client Close; Wid:" + packet.getWindowId());
+                openMenus.remove(packet.getWindowId());
+            }
+            case PacketType.Play.Client.CLICK_WINDOW -> {
+                WrapperPlayClientClickWindow packet = new WrapperPlayClientClickWindow(event);
+                SimInventory sim = openMenus.get(packet.getWindowId());
+                if(sim == null){
+                    debugInfo("Client Click Non-Sim; Wid:"+packet.getWindowId());
+                    return;}
+                debugInfo("Client Click; Wid:" + packet.getWindowId() + " Slot:" + packet.getSlot() + " Slots:" + packet.getSlots());
+                packet.getSlots().ifPresent(changedSlots -> {
+                    Map<Integer, ItemStack> mapped = new HashMap<>();
+                    changedSlots.forEach((slot, item) -> {
+                        mapped.put(sim.getBackIdxFromFrontIdx(slot), item);
+                    });
+
+                    packet.setSlots(Optional.of(mapped));
+                });
+
+                if(packet.getSlot() == -999){
+                    debugInfo("Client Click Outside");
+                    return;
                 }
-            }
-        });
-        manager.addPacketListener(new PacketAdapter(instance, PacketType.Play.Server.CLOSE_WINDOW, PacketType.Play.Client.CLOSE_WINDOW) {
-            @Override
-            public void onPacketReceiving(PacketEvent event) {
-                openMenus.remove(event.getPacket().getIntegers().read(0));
-                debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
-            }
-
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                openMenus.remove(event.getPacket().getIntegers().read(0));
-                debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
-            }
-        });
-        manager.addPacketListener(new PacketAdapter(instance,
-                PacketType.Play.Server.WINDOW_ITEMS,
-                PacketType.Play.Server.WINDOW_DATA,
-                PacketType.Play.Server.SET_SLOT,
-                PacketType.Play.Client.WINDOW_CLICK) {
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                SimInventory sim = openMenus.get(event.getPacket().getIntegers().read(0));
-                if(sim != null){
-                    debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
-                    if (event.getPacketType() == PacketType.Play.Server.WINDOW_ITEMS) {
-                        event.getPacket().getItemListModifier().modify(0, sim::fromBackToFront);
-                    } else if (event.getPacketType() == PacketType.Play.Server.WINDOW_DATA) {
-                        if(sim instanceof AnvilSim anvilSim){
-                            event.setCancelled(true);
-                            anvilSim.setCost(event.getPacket().getIntegers().read(2), event.getPlayer());
-                        }
-                    } else if (event.getPacketType() == PacketType.Play.Server.SET_SLOT) {
-                        int backSet = event.getPacket().getIntegers().read(2);
-                        int frontSet = sim.getFrontIdxFromBackIdx(backSet);
-                        debugInfo("back:" + backSet + " -> front: " + frontSet);
-                        event.getPacket().getIntegers().write(2, frontSet);
-                        debugInfo("set-finished: " + event.getPacket().getModifier().getValues());
-                    }
-                }
-            }
-
-            @Override
-            public void onPacketReceiving(PacketEvent event) {
-                SimInventory sim = openMenus.get(event.getPacket().getIntegers().read(0));
-                if(sim != null){
-                    debugInfo(event.getPacketType() + ": " + event.getPacket().getModifier().getValues());
-
-                    Int2ObjectMap<ItemStack> changedSlots = (Int2ObjectMap<ItemStack>) event.getPacket().getModifier().read(6);
-                    if(!changedSlots.isEmpty()){
-                        Int2ObjectMap<ItemStack> mapped = new Int2ObjectOpenHashMap<>();
-
-                        changedSlots.forEach((frontIdx, itemStack) -> {
-                            int backIdx = sim.getBackIdxFromFrontIdx(frontIdx);
-                            debugInfo("front:" + frontIdx + " -> back: " + backIdx);
-                            mapped.put(backIdx, itemStack);
-                        });
-
-                        event.getPacket().getModifier().write(6, mapped);
-                    }
-
-                    int frontClick = event.getPacket().getIntegers().read(2);
-                    if(frontClick == -999){
-                        return;
-                    }
-                    int backClick = sim.getBackIdxFromFrontIdx(frontClick);
-                    debugInfo("front:" + frontClick + " -> back: " + backClick);
-                    if(backClick == -2){
-                        if(AnvilSim.forwardEnabled && sim instanceof AnvilSim){
+                int backSlot = sim.getBackIdxFromFrontIdx(packet.getSlot());
+                if(backSlot == -1){
+                    event.setCancelled(true);
+                    sim.menu.sendAllDataToRemote();
+                    debugInfo("Client Click Filler");
+                    return;
+                } else if (backSlot == -2) {
+                    if(AnvilSim.forwardEnabled && sim instanceof AnvilSim){
                             PaperEvents.openForward(event.getPlayer());
                         }
-                    }
-                    if(backClick == -1){
-                        event.setCancelled(true);
-                        sim.menu.sendAllDataToRemote();
-                        return;
-                    }
-                    event.getPacket().getIntegers().write(2, backClick);
+                }
+                packet.setSlot(backSlot);
+                debugInfo("Client Click Completed; Wid:" + packet.getWindowId() + " Slot:" + packet.getSlot() + " Slots:" + packet.getSlots());
+            }
+            default -> {}
+        }
+    }
 
-                    debugInfo("click-finished: " + event.getPacket().getModifier().getValues());
+    @Override
+    public void onPacketSend(PacketSendEvent event){
+        switch (event.getPacketType()){
+            case PacketType.Play.Server.OPEN_WINDOW -> {
+                WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(event);
+                SimInventory sim = openMenus.get(packet.getContainerId());
+                if(sim == null){
+                    debugInfo("Server Open Non-Sim; Wid:" + packet.getContainerId());
+                    return;}
+                debugInfo("Server Open; Wid:" + packet.getContainerId() + " Type:" + packet.getType());
+                packet.setType(2);
+                debugInfo("Server Open Completed; Wid:" + packet.getContainerId() + " Type:" + packet.getType());
+            }
+            case PacketType.Play.Server.CLOSE_WINDOW -> {
+                WrapperPlayServerCloseWindow packet = new WrapperPlayServerCloseWindow(event);
+                debugInfo("Server Close; Wid:" + packet.getWindowId());
+                openMenus.remove(packet.getWindowId());
+            }
+            case  PacketType.Play.Server.WINDOW_ITEMS -> {
+                WrapperPlayServerWindowItems packet = new WrapperPlayServerWindowItems(event);
+                SimInventory sim = openMenus.get(packet.getWindowId());
+                if(sim == null){
+                    debugInfo("Server Items Non-Sim; Wid:" + packet.getWindowId());
+                    return;}
+                debugInfo("Server Items; Wid:" + packet.getWindowId() + " Items:" + packet.getItems());
+                packet.setItems(sim.fromBackToFront(packet.getItems()));
+                debugInfo("Server Items Completed; Wid:" + packet.getWindowId() + " Items:" + packet.getItems());
+            }
+            case  PacketType.Play.Server.WINDOW_PROPERTY -> {
+                WrapperPlayServerWindowProperty packet = new WrapperPlayServerWindowProperty(event);
+                SimInventory sim = openMenus.get(packet.getContainerId());
+                if(sim == null){
+                    debugInfo("Server Property Non-Sim; Wid:" + packet.getContainerId());
+                    return;}
+                debugInfo("Server Property; Wid:" + packet.getContainerId() + " Value:" + packet.getValue());
+                event.setCancelled(true);
+                if(sim instanceof AnvilSim anvilSim){
+                  anvilSim.setCost(packet.getValue(), event.getPlayer());
                 }
             }
-        });
+            case PacketType.Play.Server.SET_SLOT -> {
+                WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event);
+                SimInventory sim = openMenus.get(packet.getWindowId());
+                if(sim == null){
+                    debugInfo("Server Slot Non-Sim; Wid:" + packet.getWindowId());
+                    return;}
+                debugInfo("Server Slot; Wid:" + packet.getWindowId() + " Slot:"+packet.getSlot());
+                packet.setSlot(sim.getFrontIdxFromBackIdx(packet.getSlot()));
+                debugInfo("Server Slot Completed; Wid:" + packet.getWindowId() + " Slot:"+packet.getSlot());
+            }
+            default -> {}
+        }
     }
 }

@@ -1,8 +1,7 @@
 package net.sideways_sky.geyserrecipefix;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import net.sideways_sky.geyserrecipefix.config.WorkstationMode;
 import net.sideways_sky.geyserrecipefix.events.PaperEvents;
 import net.sideways_sky.geyserrecipefix.events.ProtocolEvents;
@@ -13,17 +12,15 @@ import net.sideways_sky.geyserrecipefix.inventories.AnvilSim;
 import net.sideways_sky.geyserrecipefix.inventories.SimInventory;
 import net.sideways_sky.geyserrecipefix.inventories.SmithingSim;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public final class Geyser_Recipe_Fix extends JavaPlugin implements Listener {
+public final class Geyser_Recipe_Fix extends JavaPlugin {
 
     public static Geyser_Recipe_Fix instance;
-    public static ProtocolManager manager;
     public static Map<Integer, SimInventory> openMenus = new HashMap<>();
     public static Hook geyserApi;
 
@@ -37,9 +34,16 @@ public final class Geyser_Recipe_Fix extends JavaPlugin implements Listener {
     }
 
     @Override
+    public void onLoad() {
+//        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+//        PacketEvents.getAPI().load();
+        PacketEvents.getAPI().getEventManager().registerListener(
+                new ProtocolEvents(),  PacketListenerPriority.LOW);
+    }
+
+    @Override
     public void onEnable() {
         instance = this;
-        manager = ProtocolLibrary.getProtocolManager();
         logger = getLogger();
         saveDefaultConfig();
         debug = getConfig().getBoolean("debug");
@@ -62,6 +66,13 @@ public final class Geyser_Recipe_Fix extends JavaPlugin implements Listener {
         }
 
         getServer().getPluginManager().registerEvents(new PaperEvents(), this);
-        ProtocolEvents.addListeners();
+
+
+//        PacketEvents.getAPI().init();
     }
+
+//    @Override
+//    public void onDisable() {
+//        PacketEvents.getAPI().terminate();
+//    }
 }

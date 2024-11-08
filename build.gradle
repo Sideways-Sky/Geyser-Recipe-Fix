@@ -1,11 +1,11 @@
 plugins {
     id 'java'
-    id("xyz.jpenilla.run-paper") version "2.3.0"
-    id("io.papermc.paperweight.userdev") version "1.7.1"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("io.papermc.paperweight.userdev") version "1.7.4"
 }
 
 group = 'net.sideways_sky'
-version = '1.4.1'
+version = '1.5'
 
 repositories {
     mavenCentral()
@@ -20,14 +20,15 @@ repositories {
     maven {
         url = uri("https://repo.opencollab.dev/main/")
     }
-    maven { url "https://repo.dmulloy2.net/repository/public/" }
+    maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
+    maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
 }
 
 dependencies {
     compileOnly('org.geysermc.geyser:api:2.2.0-SNAPSHOT')
     compileOnly('org.geysermc.floodgate:api:2.2.2-SNAPSHOT')
-    paperweight.paperDevBundle("1.21-R0.1-SNAPSHOT")
-    compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.1.0";
+    paperweight.paperDevBundle("1.21.3-R0.1-SNAPSHOT")
+    compileOnly( "com.github.retrooper:packetevents-spigot:2.6.0")
 }
 
 def targetJavaVersion = 21
@@ -51,7 +52,7 @@ tasks {
         dependsOn(reobfJar)
     }
     runServer {
-        minecraftVersion("1.20.4")
+        minecraftVersion("1.21.3")
     }
 }
 
