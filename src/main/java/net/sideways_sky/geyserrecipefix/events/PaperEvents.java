@@ -52,7 +52,7 @@ public class PaperEvents implements Listener {
                 AnvilSim.mode.test(e.getPlayer())
         )){
 
-            AbstractContainerMenu menu = ((CraftInventoryView) e.getView()).getHandle();
+            AbstractContainerMenu menu = ((CraftInventoryView<?, ?>) e.getView()).getHandle();
             SimInventory sim = openMenus.get(menu.containerId);
             if(sim == null){
                 debugInfo("New Sim; Wid:"+menu.containerId);

@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id("io.papermc.paperweight.userdev") version "1.7.4"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.14"
 }
 
 group = 'net.sideways_sky'
@@ -25,9 +25,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly('org.geysermc.geyser:api:2.2.0-SNAPSHOT')
-    compileOnly('org.geysermc.floodgate:api:2.2.2-SNAPSHOT')
-    paperweight.paperDevBundle("1.21.3-R0.1-SNAPSHOT")
+    compileOnly('org.geysermc.geyser:api:2.4.2-SNAPSHOT')
+    compileOnly('org.geysermc.floodgate:api:2.2.3-SNAPSHOT')
+    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     compileOnly( "com.github.retrooper:packetevents-spigot:2.6.0")
 }
 
@@ -49,10 +49,10 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks {
     assemble {
-        dependsOn(reobfJar)
+        dependsOn(tasks.reobfJar)
     }
     runServer {
-        minecraftVersion("1.21.3")
+        minecraftVersion("1.21.4")
     }
 }
 
