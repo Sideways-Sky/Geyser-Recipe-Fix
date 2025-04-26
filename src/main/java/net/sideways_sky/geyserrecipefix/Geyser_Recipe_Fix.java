@@ -71,8 +71,4 @@ public final class Geyser_Recipe_Fix extends JavaPlugin {
 //        PacketEvents.getAPI().init();
     }
 
-//    @Override
-//    public void onDisable() {
-//        PacketEvents.getAPI().terminate();
-//    }
 }

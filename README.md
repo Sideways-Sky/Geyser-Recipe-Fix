@@ -1,13 +1,25 @@
-# Geyser Recipe Fix
+<p align="center">
+    A Minecraft Server Plugin
+</p>
+<p align="center">
+  <img src="https://cdn.modrinth.com/data/ToCzxMGc/1755362652147cec534e693a26b1f594f3a12f26_96.webp" alt="Logo">
+  <h1 align="center">Geyser Recipe Fix</h1>
+</p>
+
+<p align="center">
+  Allows Bedrock (Geyser) Players to use custom anvil and smithing recipes.
+</p>
 
 Allows Bedrock (Geyser) Players to use custom anvil and smithing recipes with custom menus.
 
 #### This plugin will:
+
 - Add a geyser texture pack (1 custom item)
 - Override the anvil and smithing table menus for **ONLY** bedrock players (Java Players are not affected)
 - Use packets so most any other plugin or datapack will work with it
 
 #### installation:
+
 1. Make sure [Geyser](https://geysermc.org/download) and/or [floodgate](https://geysermc.org/download#floodgate) is in your plugins
 2. Download and install [packetevents](https://modrinth.com/plugin/packetevents) <small>(use [ProtocolLib](https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/) for v1.4.1 and below)</small>
 3. Download and place in the plugins folder <small>(This is **NOT** a geyser extension, It's a separate plugin that hooks into geyser)</small>
