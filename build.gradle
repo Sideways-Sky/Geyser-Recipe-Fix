@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.sideways_sky'
-version = '1.6'
+version = '1.5'
 
 repositories {
     mavenCentral()
