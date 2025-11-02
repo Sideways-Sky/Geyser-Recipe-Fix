@@ -35,8 +35,6 @@ public final class Geyser_Recipe_Fix extends JavaPlugin {
 
     @Override
     public void onLoad() {
-//        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
-//        PacketEvents.getAPI().load();
         PacketEvents.getAPI().getEventManager().registerListener(
                 new ProtocolEvents(),  PacketListenerPriority.LOW);
     }
@@ -66,9 +64,6 @@ public final class Geyser_Recipe_Fix extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(new PaperEvents(), this);
-
-
-//        PacketEvents.getAPI().init();
     }
 
 }
