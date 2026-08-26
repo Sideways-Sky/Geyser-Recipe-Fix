@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.sideways_sky'
-version = '1.5'
+version = '1.6'
 
 repositories {
     mavenCentral()
@@ -27,13 +27,13 @@ repositories {
 dependencies {
     compileOnly('org.geysermc.geyser:api:2.8.3-SNAPSHOT')
     compileOnly('org.geysermc.floodgate:api:2.2.4-SNAPSHOT')
-    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
-    compileOnly( "com.github.retrooper:packetevents-spigot:2.10.0")
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.11.2")
 }
 
 tasks {
     runServer {
-        minecraftVersion("1.21.8")
+        minecraftVersion("1.21.11")   // was 1.21.8
     }
 }
 
